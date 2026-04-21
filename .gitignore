@@ -1,0 +1,8 @@
+build/
+install/
+*.obj
+*.exe
+*.usd
+*.xodr
+*.log
+Testing/
