@@ -4,10 +4,15 @@ A C++ tool that converts OpenDRIVE (.xodr) files to 3D mesh formats (USD and OBJ
 
 ## Features
 
-- Parses OpenDRIVE files (roads, lanes, objects, signals)
+- Parses OpenDRIVE files (roads, lanes, objects, signals, junctions)
 - Exports to USD (.usda) format
 - Exports to OBJ (.obj) format
 - Supports lane geometry with widths, elevation, and superelevation
+- Handles junction connections and lane meshing
+- Supports 5 geometry types: LINE, ARC, SPIRAL, POLY3, PARAMPOLY3
+- Supports 29+ lane types (driving, shoulder, border, stopping, restricted, parking, median, biking, sidewalk, curb, walking, tram, rail, bidirectional, shared, onRamp, offRamp, connectingRamp, entry, exit, bus, taxi, hov, slipLane, roadworks, special1/2/3)
+- Supports 22+ object types (barrier, pole, tree, vegetation, building, obstacle, gantry, crosswalk, roadMark, roadSurface, parkingSpace, trafficIsland, and vehicle-dependent objects)
+- Supports 60+ signal types (speedLimit, maxSpeed, minSpeed, noPassing, stop, yield, trafficLight, and many more)
 
 ## Building
 
@@ -59,16 +64,33 @@ opendrive-mesh road.xodr road.obj 0.5
 
 ```
 src/
-├── parser/       # OpenDRIVE XML parser
+├── parser/       # OpenDRIVE XML parser (roads, lanes, objects, signals, junctions)
 ├── geometry/     # Road geometry and lane mesh generation
 ├── mesh/         # Mesh generation (objects, signals, junctions)
 ├── export/       # USD and OBJ exporters
-├── types/        # Shared data types
+├── types/        # Shared data types (Mesh, Vertex, Triangle, MeshType)
 └── main.cpp      # CLI entry point
 
 extern/pugixml/   # XML parsing library
-tests/            # Unit tests
+tests/            # Unit tests (59 tests)
 ```
+
+## Coordinate System
+
+The tool converts OpenDRIVE coordinates to USD coordinates:
+- OpenDRIVE X → USD X (forward)
+- OpenDRIVE Y → USD Z (left)
+- OpenDRIVE Z → USD -Y (up becomes down)
+
+## Test Coverage
+
+59 unit tests covering:
+- Vec3 vector math (constructor, arithmetic, length, normalization, dot/cross products)
+- FrenetFrame computation and coordinate transforms
+- Plan view geometry (LINE, ARC, POLY3, PARAMPOLY3, SPIRAL)
+- Elevation and superelevation profiles
+- Junction parsing and mesh generation
+- Signal, object, and lane type parsing
 
 ## License
 

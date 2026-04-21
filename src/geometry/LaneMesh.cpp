@@ -1,5 +1,6 @@
 #include "LaneMesh.h"
 #include "Math.h"
+#include "types/MeshTypes.h"
 #include <algorithm>
 #include <cmath>
 
@@ -9,6 +10,7 @@ LaneMesh::LaneMesh(const Road& road, const RoadGeometry& geometry, double stepSi
 Mesh LaneMesh::generate() const {
     Mesh mesh;
     mesh.name = "road_" + std::to_string(road_.id);
+    mesh.type = MESH_TYPE_PLANAR;
     
     if (road_.laneSections.empty()) return mesh;
     

@@ -17,6 +17,9 @@ std::vector<Mesh> MeshGenerator::generateAll() {
     auto signals = generateSignals();
     result.insert(result.end(), signals.begin(), signals.end());
     
+    auto junctions = generateJunctions();
+    result.insert(result.end(), junctions.begin(), junctions.end());
+    
     return result;
 }
 
@@ -55,6 +58,20 @@ std::vector<Mesh> MeshGenerator::generateSignals() {
         auto meshes = sigMesh.generate();
         result.insert(result.end(), meshes.begin(), meshes.end());
     }
+    
+    return result;
+}
+
+std::vector<Mesh> MeshGenerator::generateJunctions() {
+    std::vector<Mesh> result;
+    
+    if (file_.junctions.empty()) {
+        return result;
+    }
+    
+    JunctionMesh junctionMesh(file_, stepSize_);
+    auto meshes = junctionMesh.generate();
+    result.insert(result.end(), meshes.begin(), meshes.end());
     
     return result;
 }

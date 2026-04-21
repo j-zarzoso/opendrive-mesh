@@ -1,5 +1,6 @@
 #include "SignalMesh.h"
 #include "Math.h"
+#include "types/MeshTypes.h"
 #include <cmath>
 
 SignalMesh::SignalMesh(const Road& road, const RoadGeometry& geometry)
@@ -11,6 +12,7 @@ std::vector<Mesh> SignalMesh::generate() {
     for (auto& sig : road_.signals) {
         Mesh pole;
         pole.name = "signal_pole_" + sig.id;
+        pole.type = MESH_TYPE_CYLINDER;
         
         auto sample = geometry_.sample(sig.s);
         Vec3 base = sample.position + sample.frame.normal * sig.hOffset + sample.frame.binormal * sig.z;
