@@ -21,6 +21,7 @@ OpenDRIVEFile OpenDRIVEParser::parse(const std::string& filepath) {
         parseHeader(headerNode, file.header);
     }
     parseRoads(root, file);
+    parseJunctions(root, file);
     return file;
 }
 
@@ -135,6 +136,39 @@ void OpenDRIVEParser::parseLateralProfile(pugi::xml_node roadNode, Road& road) {
     }
 }
 
+void OpenDRIVEParser::parseLaneType(const std::string& typeStr, LaneType& laneType) {
+    if (typeStr == "driving") laneType = LANE_DRIVING;
+    else if (typeStr == "shoulder") laneType = LANE_SHOULDER;
+    else if (typeStr == "border") laneType = LANE_BORDER;
+    else if (typeStr == "stop") laneType = LANE_STOP;
+    else if (typeStr == "none") laneType = LANE_NONE;
+    else if (typeStr == "restricted") laneType = LANE_RESTRICTED;
+    else if (typeStr == "parking") laneType = LANE_PARKING;
+    else if (typeStr == "median") laneType = LANE_MEDIAN;
+    else if (typeStr == "biking") laneType = LANE_BIKING;
+    else if (typeStr == "sidewalk") laneType = LANE_SIDEWALK;
+    else if (typeStr == "curb") laneType = LANE_CURB;
+    else if (typeStr == "walking") laneType = LANE_WALKING;
+    else if (typeStr == "tram") laneType = LANE_TRAM;
+    else if (typeStr == "rail") laneType = LANE_RAIL;
+    else if (typeStr == "bidirectional") laneType = LANE_BIDIRECTIONAL;
+    else if (typeStr == "shared") laneType = LANE_SHARED;
+    else if (typeStr == "onRamp") laneType = LANE_ONRAMP;
+    else if (typeStr == "offRamp") laneType = LANE_OFFRAMP;
+    else if (typeStr == "connectingRamp") laneType = LANE_CONNECTINGRAMP;
+    else if (typeStr == "entry") laneType = LANE_ENTRY;
+    else if (typeStr == "exit") laneType = LANE_EXIT;
+    else if (typeStr == "bus") laneType = LANE_BUS;
+    else if (typeStr == "taxi") laneType = LANE_TAXI;
+    else if (typeStr == "hov") laneType = LANE_HOV;
+    else if (typeStr == "slipLane") laneType = LANE_SLIP_LANE;
+    else if (typeStr == "roadworks") laneType = LANE_ROADWORKS;
+    else if (typeStr == "special1") laneType = LANE_SPECIAL1;
+    else if (typeStr == "special2") laneType = LANE_SPECIAL2;
+    else if (typeStr == "special3") laneType = LANE_SPECIAL3;
+    else laneType = LANE_DRIVING;
+}
+
 void OpenDRIVEParser::parseLanes(pugi::xml_node roadNode, Road& road) {
     auto lanesNode = roadNode.child("lanes");
     if (!lanesNode) return;
@@ -160,21 +194,7 @@ void OpenDRIVEParser::parseLaneSections(pugi::xml_node lanesNode, Road& road) {
                 Lane lane;
                 lane.id = laneNode.attribute("id").as_int();
                 std::string typeStr = laneNode.attribute("type").as_string();
-                if (typeStr == "driving") lane.type = LANE_DRIVING;
-                else if (typeStr == "shoulder") lane.type = LANE_SHOULDER;
-                else if (typeStr == "border") lane.type = LANE_BORDER;
-                else if (typeStr == "stop") lane.type = LANE_STOP;
-                else if (typeStr == "none") lane.type = LANE_NONE;
-                else if (typeStr == "restricted") lane.type = LANE_RESTRICTED;
-                else if (typeStr == "parking") lane.type = LANE_PARKING;
-                else if (typeStr == "median") lane.type = LANE_MEDIAN;
-                else if (typeStr == "biking") lane.type = LANE_BIKING;
-                else if (typeStr == "sidewalk") lane.type = LANE_SIDEWALK;
-                else if (typeStr == "curb") lane.type = LANE_CURB;
-                else if (typeStr == "walking") lane.type = LANE_WALKING;
-                else if (typeStr == "tram") lane.type = LANE_TRAM;
-                else if (typeStr == "rail") lane.type = LANE_RAIL;
-                else lane.type = LANE_DRIVING;
+                parseLaneType(typeStr, lane.type);
                 ls.centerLane.push_back(lane);
             }
         }
@@ -195,23 +215,9 @@ void OpenDRIVEParser::parseLaneGroup(pugi::xml_node groupNode, std::vector<Lane>
         Lane lane;
         lane.id = laneNode.attribute("id").as_int();
         std::string typeStr = laneNode.attribute("type").as_string();
-        if (typeStr == "driving") lane.type = LANE_DRIVING;
-        else if (typeStr == "shoulder") lane.type = LANE_SHOULDER;
-        else if (typeStr == "border") lane.type = LANE_BORDER;
-        else if (typeStr == "stop") lane.type = LANE_STOP;
-        else if (typeStr == "none") lane.type = LANE_NONE;
-        else if (typeStr == "restricted") lane.type = LANE_RESTRICTED;
-        else if (typeStr == "parking") lane.type = LANE_PARKING;
-        else if (typeStr == "median") lane.type = LANE_MEDIAN;
-        else if (typeStr == "biking") lane.type = LANE_BIKING;
-        else if (typeStr == "sidewalk") lane.type = LANE_SIDEWALK;
-        else if (typeStr == "curb") lane.type = LANE_CURB;
-        else if (typeStr == "walking") lane.type = LANE_WALKING;
-        else if (typeStr == "tram") lane.type = LANE_TRAM;
-        else if (typeStr == "rail") lane.type = LANE_RAIL;
-        else lane.type = LANE_DRIVING;
+        parseLaneType(typeStr, lane.type);
         std::string levelStr = laneNode.attribute("level").as_string();
-       if (levelStr == "true") lane.level = true;
+        if (levelStr == "true") lane.level = true;
         for (auto& widthNode : laneNode.children("width")) {
             LaneWidthCoeff w;
             w.s = widthNode.attribute("sOffset").as_double();
@@ -224,6 +230,23 @@ void OpenDRIVEParser::parseLaneGroup(pugi::xml_node groupNode, std::vector<Lane>
         lanes.push_back(lane);
     }
 }
+void OpenDRIVEParser::parseObjectType(const std::string& typeStr, ObjectType& objType) {
+    if (typeStr == "barrier") objType = OBJ_BARRIER;
+    else if (typeStr == "pole") objType = OBJ_POLE;
+    else if (typeStr == "tree") objType = OBJ_TREE;
+    else if (typeStr == "vegetation") objType = OBJ_VEGETATION;
+    else if (typeStr == "building") objType = OBJ_BUILDING;
+    else if (typeStr == "obstacle") objType = OBJ_OBSTACLE;
+    else if (typeStr == "gantry") objType = OBJ_GANTRY;
+    else if (typeStr == "crosswalk") objType = OBJ_CROSSWALK;
+    else if (typeStr == "roadMark") objType = OBJ_ROAD_MARK;
+    else if (typeStr == "roadSurface") objType = OBJ_ROAD_SURFACE;
+    else if (typeStr == "parkingSpace") objType = OBJ_PARKING_SPACE;
+    else if (typeStr == "trafficIsland") objType = OBJ_TRAFFIC_ISLAND;
+    // Vehicle and device dependent objects fall through to OBJ_NONE
+    else objType = OBJ_NONE;
+}
+
 void OpenDRIVEParser::parseObjects(pugi::xml_node roadNode, Road& road) {
     auto objGroup = roadNode.child("objects");
     if (!objGroup) return;
@@ -243,14 +266,7 @@ void OpenDRIVEParser::parseObjects(pugi::xml_node roadNode, Road& road) {
         obj.name = objNode.attribute("name").as_string();
         obj.subtype = objNode.attribute("subtype").as_string();
         std::string typeStr = objNode.attribute("type").as_string();
-        if (typeStr == "barrier") obj.type = OBJ_BARRIER;
-        else if (typeStr == "pole") obj.type = OBJ_POLE;
-        else if (typeStr == "tree") obj.type = OBJ_TREE;
-        else if (typeStr == "vegetation") obj.type = OBJ_VEGETATION;
-        else if (typeStr == "building") obj.type = OBJ_BUILDING;
-        else if (typeStr == "obstacle") obj.type = OBJ_OBSTACLE;
-        else if (typeStr == "gantry") obj.type = OBJ_GANTRY;
-        else obj.type = OBJ_NONE;
+        parseObjectType(typeStr, obj.type);
         obj.hasRepeat = false;
         auto repeatNode = objNode.child("repeat");
         if (repeatNode) {
@@ -269,6 +285,79 @@ void OpenDRIVEParser::parseObjects(pugi::xml_node roadNode, Road& road) {
     }
 }
 
+void OpenDRIVEParser::parseSignalType(const std::string& typeStr, SignalType& sigType) {
+    if (typeStr == "speedLimit") sigType = SIG_SPEED_LIMIT;
+    else if (typeStr == "maxSpeed") sigType = SIG_MAX_SPEED;
+    else if (typeStr == "minSpeed") sigType = SIG_MIN_SPEED;
+    else if (typeStr == "noPassing") sigType = SIG_NO_PASSING;
+    else if (typeStr == "stop") sigType = SIG_STOP;
+    else if (typeStr == "yield") sigType = SIG_YIELD;
+    else if (typeStr == "trafficLight") sigType = SIG_TRAFFIC_LIGHT;
+    else if (typeStr == "endAllRestrictions") sigType = SIG_END_ALL_RESTRICTIONS;
+    else if (typeStr == "general") sigType = SIG_GENERAL;
+    else if (typeStr == "priorityRoad") sigType = SIG_PRIORITY_ROAD;
+    else if (typeStr == "parking") sigType = SIG_PARKING;
+    else if (typeStr == "streetName") sigType = SIG_STREET_NAME;
+    else if (typeStr == "endOfParking") sigType = SIG_END_OF_PARKING;
+    else if (typeStr == "endOfNoPassing") sigType = SIG_END_OF_NO_PASSING;
+    else if (typeStr == "maxSpeedEnd") sigType = SIG_MAX_SPEED_END;
+    else if (typeStr == "minSpeedEnd") sigType = SIG_MIN_SPEED_END;
+    else if (typeStr == "endOfAllRestrictions") sigType = SIG_END_OF_ALL_RESTRICTIONS;
+    else if (typeStr == "zoneEnd") sigType = SIG_ZONE_END;
+    else if (typeStr == "recommendedSpeed") sigType = SIG_RECOMMENDED_SPEED;
+    else if (typeStr == "pedS") sigType = SIG_PEDS;
+    else if (typeStr == "cyclePath") sigType = SIG_CYCLE_PATH;
+    else if (typeStr == "dangerousCorners") sigType = SIG_DANGEROUS_CORNERS;
+    else if (typeStr == "otherDanger") sigType = SIG_OTHER_DANGER;
+    else if (typeStr == "roadWide") sigType = SIG_ROAD_WIDE;
+    else if (typeStr == "roadNarrowsRight") sigType = SIG_ROAD_NARROWS_RIGHT;
+    else if (typeStr == "roadNarrowsLeft") sigType = SIG_ROAD_NARROWS_LEFT;
+    else if (typeStr == "roadworks") sigType = SIG_ROADWORKS;
+    else if (typeStr == "preferOthers") sigType = SIG_PREFER_OTHERS;
+    else if (typeStr == "roadBump") sigType = SIG_ROAD_BUMP;
+    else if (typeStr == "unstop") sigType = SIG_UNSTOP;
+    else if (typeStr == "unyield") sigType = SIG_UNYIELD;
+    else if (typeStr == "sidewalk") sigType = SIG_SIDEWALK;
+    else if (typeStr == "sidewalkEnd") sigType = SIG_SIDEWALK_END;
+    else if (typeStr == "cyclePathEnd") sigType = SIG_CYCLE_PATH_END;
+    else if (typeStr == "pedestrians") sigType = SIG_PEDESTRIANS;
+    else if (typeStr == "pedestriansEnd") sigType = SIG_PEDESTRIANS_END;
+    else if (typeStr == "railwayCrossing") sigType = SIG_RAILWAY_CROSSING;
+    else if (typeStr == "automobileRoad") sigType = SIG_AUTOMOBILE_ROAD;
+    else if (typeStr == "automobileEntry") sigType = SIG_AUTOMOBILE_ENTRY;
+    else if (typeStr == "automobileEnd") sigType = SIG_AUTOMOBILE_END;
+    else if (typeStr == "automobileFollow") sigType = SIG_AUTOMOBILE_FOLLOW;
+    else if (typeStr == "priorityAutomobile") sigType = SIG_PRIORITY_AUTOMOBILE;
+    else if (typeStr == "roadSigns") sigType = SIG_ROAD_SIGNS;
+    else if (typeStr == "trafficSignal") sigType = SIG_TRAFFIC_SIGNAL;
+    else if (typeStr == "trafficSignalBack") sigType = SIG_TRAFFIC_SIGNAL_BACK;
+    else if (typeStr == "generalInformation") sigType = SIG_GENERAL_INFORMATION;
+    else if (typeStr == "serviceArea") sigType = SIG_SERVICE_AREA;
+    else if (typeStr == "automobileHospital") sigType = SIG_AUTOMOBILE_HOSPITAL;
+    else if (typeStr == "automobileTelephone") sigType = SIG_AUTOMOBILE_TELEPHONE;
+    else if (typeStr == "automobileShelter") sigType = SIG_AUTOMOBILE_SHELTER;
+    else if (typeStr == "automobileGarage") sigType = SIG_AUTOMOBILE_GARAGE;
+    else if (typeStr == "automobilePetrolStation") sigType = SIG_AUTOMOBILE_PETROL_STATION;
+    else if (typeStr == "automobileExcursion") sigType = SIG_AUTOMOBILE_EXCURSION;
+    else if (typeStr == "automobileCamping") sigType = SIG_AUTOMOBILE_CAMPING;
+    else if (typeStr == "automobileRestArea") sigType = SIG_AUTOMOBILE_REST_AREA;
+    else if (typeStr == "automobileToll") sigType = SIG_AUTOMOBILE_TOLL;
+    else if (typeStr == "automobileTelephoneEmergency") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY;
+    else if (typeStr == "automobileTelephoneGeneral") sigType = SIG_AUTOMOBILE_TELEPHONE_GENERAL;
+    else if (typeStr == "automobileTelephoneEmergencyRed") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY_RED;
+    else if (typeStr == "automobileTelephoneEmergencyGreen") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY_GREEN;
+    else if (typeStr == "automobileTelephoneEmergencyBlue") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY_BLUE;
+    else if (typeStr == "automobileTelephoneEmergencyYellow") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY_YELLOW;
+    else if (typeStr == "automobileTelephoneEmergencyOrange") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY_ORANGE;
+    else if (typeStr == "automobileTelephoneEmergencyViolet") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY_VIOLET;
+    else if (typeStr == "automobileTelephoneEmergencyBlack") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY_BLACK;
+    else if (typeStr == "automobileTelephoneEmergencyWhite") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY_WHITE;
+    else if (typeStr == "automobileTelephoneEmergencyGray") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY_GRAY;
+    else if (typeStr == "automobileTelephoneEmergencyBrown") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY_BROWN;
+    else if (typeStr == "automobileTelephoneEmergency") sigType = SIG_AUTOMOBILE_TELEPHONE_EMERGENCY;
+    else sigType = SIG_GENERIC;
+}
+
 void OpenDRIVEParser::parseSignals(pugi::xml_node roadNode, Road& road) {
     auto sigGroup = roadNode.child("signals");
     if (!sigGroup) return;
@@ -276,7 +365,8 @@ void OpenDRIVEParser::parseSignals(pugi::xml_node roadNode, Road& road) {
         Signal sig;
         sig.id = sigNode.attribute("id").as_string();
         sig.name = sigNode.attribute("name").as_string();
-        sig.type = SIG_GENERIC;
+        std::string typeStr = sigNode.attribute("type").as_string();
+        parseSignalType(typeStr, sig.type);
         sig.subtype = sigNode.attribute("subtype").as_string();
         auto posNode = sigNode.child("positionRoad");
         if (posNode) {
@@ -288,5 +378,43 @@ void OpenDRIVEParser::parseSignals(pugi::xml_node roadNode, Road& road) {
         sig.dynamic = (sigNode.attribute("dynamic").as_int() == 1);
         sig.height = sigNode.attribute("height").as_double();
         road.signals.push_back(sig);
+    }
+}
+
+void OpenDRIVEParser::parseJunctions(pugi::xml_node parent, OpenDRIVEFile& file) {
+    for (auto& junctionNode : parent.children("junction")) {
+        Junction junction;
+        junction.id = junctionNode.attribute("id").as_int();
+        junction.name = junctionNode.attribute("name").as_string();
+        junction.type = junctionNode.attribute("type").as_int();
+        
+        for (auto& mgNode : junctionNode.children("maneuverGroup")) {
+            ManeuverGroup mg;
+            mg.id = mgNode.attribute("id").as_string();
+            for (auto& icNode : mgNode.children("incomingConnection")) {
+                IncomingConnection ic;
+                ic.roadId = icNode.attribute("roadId").as_int();
+                mg.incomingConnections.push_back(ic);
+            }
+            for (auto& ocNode : mgNode.children("outgoingConnection")) {
+                OutgoingConnection oc;
+                oc.roadId = ocNode.attribute("roadId").as_int();
+                mg.outgoingConnections.push_back(oc);
+            }
+            junction.maneuverGroups.push_back(mg);
+        }
+        
+        for (auto& icNode : junctionNode.children("incomingConnection")) {
+            IncomingConnection ic;
+            ic.roadId = icNode.attribute("roadId").as_int();
+            junction.roadIds.push_back(ic.roadId);
+        }
+        for (auto& ocNode : junctionNode.children("outgoingConnection")) {
+            OutgoingConnection oc;
+            oc.roadId = ocNode.attribute("roadId").as_int();
+            junction.roadIds.push_back(oc.roadId);
+        }
+        
+        file.junctions.push_back(junction);
     }
 }

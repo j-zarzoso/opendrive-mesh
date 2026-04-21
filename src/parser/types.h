@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <string>
 #include <vector>
 #include <cstdint>
@@ -250,9 +250,32 @@ struct Road {
     std::vector<Signal> signals;
 };
 
+struct IncomingConnection {
+    int roadId;
+};
+
+struct OutgoingConnection {
+    int roadId;
+};
+
+struct ManeuverGroup {
+    std::string id;
+    std::vector<IncomingConnection> incomingConnections;
+    std::vector<OutgoingConnection> outgoingConnections;
+};
+
+struct Junction {
+    int id;
+    std::string name;
+    int type;
+    std::vector<ManeuverGroup> maneuverGroups;
+    std::vector<int> roadIds;
+};
+
 struct OpenDRIVEFile {
     Header header;
     std::vector<Road> roads;
     std::vector<Object> globalObjects;
     std::vector<Signal> globalSignals;
+    std::vector<Junction> junctions;
 };

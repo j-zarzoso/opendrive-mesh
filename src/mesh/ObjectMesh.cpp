@@ -1,5 +1,6 @@
 #include "ObjectMesh.h"
 #include "Math.h"
+#include "types/MeshTypes.h"
 
 ObjectMesh::ObjectMesh(const Road& road, const RoadGeometry& geometry)
     : road_(road), geometry_(geometry) {}
@@ -10,6 +11,7 @@ std::vector<Mesh> ObjectMesh::generate() {
     for (auto& obj : road_.objects) {
         Mesh mesh;
         mesh.name = "object_" + obj.id;
+        mesh.type = MESH_TYPE_BOX;
         
         float hw = static_cast<float>(obj.width / 2.0);
         float hh = static_cast<float>(obj.height / 2.0);

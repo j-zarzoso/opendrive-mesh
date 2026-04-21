@@ -5,6 +5,7 @@
 #include "types/MeshTypes.h"
 #include "export/USDExporter.h"
 #include "export/OBJExporter.h"
+#include "mesh/JunctionMesh.h"
 #include <string>
 #include <vector>
 
@@ -23,6 +24,9 @@ public:
     
     // Generate signal meshes
     std::vector<Mesh> generateSignals();
+    
+    // Generate junction meshes
+    std::vector<Mesh> generateJunctions();
     
     // Generate and export to USD
     void exportToUsd(const std::string& outputPath);
